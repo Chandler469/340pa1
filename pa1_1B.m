@@ -43,6 +43,7 @@ pause();
 % over all 3 channels.
 
 % You are NOT ALLOWED to use the imcrop function of Matlab.
+figure();
 imshow(img)
 title("Click and drag to select an area:")
 rect = getrect;
@@ -51,6 +52,7 @@ y = round(rect(2));
 width = round(rect(3));
 height = round(rect(4));
 roi = img(y: y + height, x: x + width, :);
+figure(1)
 subplot(2, 3, 3);
 imshow(roi)
 title("Selected region")
@@ -74,17 +76,17 @@ function J = luminance_change(I, option, value)
     mid_width = round(width/2);
     I = im2double(I);
     if option == 'c'
-        top_left = value * (I(1: mid_height, 1: mid_width, :) - 127.5) + 127.5;
-        top_left = min(max(top_left, 0), 255.0);
-        bottom_right = value * (I(mid_height: height, mid_width: width, :) - 127.5) + 127.5;
-        bottom_right = min(max(bottom_right, 0), 255.0);
-        I(mid_height: height, mid_width: width, :) = top_left;
-        I(mid_height: height, mid_width: width, :) = bottom_right;
+        top_left = value * (I(1: mid_height, 1: mid_width, :) - 0.5) + 0.5;
+        top_left = min(max(top_left, 0), 1.0);
+        bottom_right = value * (I(mid_height+1: height, mid_width+1: width, :) - 0.5) + 0.5;
+        bottom_right = min(max(bottom_right, 0), 1.0);
+        I(1: mid_height, 1: mid_width, :) = top_left;
+        I(mid_height+1: height, mid_width+1: width, :) = bottom_right;
     elseif option == 'b'
-        top_right = min(I(1: mid_height, mid_width: width, :) * (1 + value), 1);
-        bottom_left = min(I(mid_height: height, 1: mid_width, :) * (1 + value), 1);
-        I(1: mid_height, mid_width: width, :) = top_right;
-        I(mid_height: height, 1: mid_width, :) = bottom_left;
+        top_right = min(I(1: mid_height, mid_width+1: width, :) + value, 1);
+        bottom_left = min(I(mid_height+1: height, 1: mid_width, :) + value, 1);
+        I(1: mid_height, mid_width+1: width, :) = top_right;
+        I(mid_height+1: height, 1: mid_width, :) = bottom_left;
     end
     J = I;
 end
@@ -108,3 +110,7 @@ pause();
 % f) [Extra question for curiosity, no points]: 
 % Display a version of the image after it's been blurred using a
 % Gaussian filter. Hint: imgaussfilt()
+blurred_img = imgaussfilt(img, 2);
+subplot(2, 3, 6);
+imshow(blurred_img);
+title("Gaussian blur");
